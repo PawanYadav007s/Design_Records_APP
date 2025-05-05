@@ -137,6 +137,8 @@ def edit_record(record_id):
         record.design_location = request.form['design_location']
         record.design_release_date = datetime.strptime(request.form['design_release_date'], '%Y-%m-%d').date()
         db.session.commit()
+        export_all_data_to_excel()
+
         return redirect(url_for('view_all'))
     return render_template('edit_record.html', record=record)
 
@@ -145,6 +147,7 @@ def delete_record(record_id):
     record = DesignRecord.query.get_or_404(record_id)
     db.session.delete(record)
     db.session.commit()
+    export_all_data_to_excel()
     return redirect(url_for('view_all'))
 
 
