@@ -31,9 +31,10 @@
                         <td>{{ po.client_company_name }}</td>
                         <td>{{ record.designer_name }}</td>
                         <td>
-                            <a href="file://{{ record.design_location }}" target="_blank">
+                            <a href="file:///{{ record.design_location.replace('\\', '/') }}" target="_blank">
                                 {{ record.design_location }}
                             </a>
+                            
                         </td>
                         <td>{{ record.design_release_date.strftime('%Y-%m-%d') }}</td>
                         <td>

@@ -4,7 +4,10 @@ from flask import Flask, render_template, request, redirect, url_for, send_file
 from models import db, PORecord, DesignRecord
 from datetime import datetime
 import pandas as pd
- 
+from helpers import export_all_data_to_excel  # if you’ve modularized it
+
+
+
 
 
 # from reportlab.lib.pagesizes import letter
@@ -15,6 +18,12 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///design.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
+
+
+with app.app_context():
+    export_all_data_to_excel()
+
+
 
 # Load configuration from settings.json
 def load_settings():
@@ -80,6 +89,8 @@ def add_form():
     po_numbers = PORecord.query.filter_by(design_status='pending').all()
     return render_template('add_form.html', po_numbers=po_numbers)
 
+
+
 @app.route('/view_all')
 def view_all():
     records = db.session.query(DesignRecord, PORecord).join(PORecord).order_by(DesignRecord.id.desc()).all()
@@ -136,16 +147,18 @@ def export_excel():
             record.design_release_date
         ])
     
-    df = pd.DataFrame(data, columns=['Sr.No', 'PO Number', 'PO Date', 'Project Name', 'Customer Name',
-                                     'Designer Name', 'Reference Design', 'Design Location', 'Design Release Date'])
+    df = pd.DataFrame(data, columns=[
+        'Sr.No', 'PO Number', 'PO Date', 'Project Name', 'Customer Name',
+        'Designer Name', 'Reference Design', 'Design Location', 'Design Release Date'
+    ])
 
-    # Use the path from settings.json
-    filepath = settings["excel_save_path"]
-
-    # Ensure the directory exists
-    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+    # Build full filepath with filename
+    directory = settings["excel_save_path"]
+    os.makedirs(directory, exist_ok=True)
+    filepath = os.path.join(directory, "design_records.xlsx")
 
     df.to_excel(filepath, index=False)
+
     return send_file(filepath, as_attachment=True)
 
 
