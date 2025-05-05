@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Edit Design Record{% endblock %}
+
+{% block content %}
+<h2>Edit Design Record</h2>
+<form method="POST">
+    <div class="mb-3">
+        <label>Designer Name</label>
+        <input type="text" name="designer_name" value="{{ record.designer_name }}" class="form-control" required>
+    </div>
+    <div class="mb-3">
+        <label>Reference Design Location</label>
+        <input type="text" name="reference_design_location" value="{{ record.reference_design_location }}" class="form-control" required>
+    </div>
+    <div class="mb-3">
+        <label>Design Location</label>
+        <input type="text" name="design_location" value="{{ record.design_location }}" class="form-control" required>
+    </div>
+    <div class="mb-3">
+        <label>Design Release Date</label>
+        <input type="date" name="design_release_date" value="{{ record.design_release_date }}" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Update</button>
+    <a href="{{ url_for('view_all') }}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}

@@ -98,6 +98,27 @@ def search():
         ).all()
     return render_template('search.html', records=records, query=query)
 
+
+@app.route('/edit/<int:record_id>', methods=['GET', 'POST'])
+def edit_record(record_id):
+    record = DesignRecord.query.get_or_404(record_id)
+    if request.method == 'POST':
+        record.designer_name = request.form['designer_name']
+        record.reference_design_location = request.form['reference_design_location']
+        record.design_location = request.form['design_location']
+        record.design_release_date = datetime.strptime(request.form['design_release_date'], '%Y-%m-%d').date()
+        db.session.commit()
+        return redirect(url_for('view_all'))
+    return render_template('edit_record.html', record=record)
+
+@app.route('/delete/<int:record_id>', methods=['GET'])
+def delete_record(record_id):
+    record = DesignRecord.query.get_or_404(record_id)
+    db.session.delete(record)
+    db.session.commit()
+    return redirect(url_for('view_all'))
+
+
 @app.route('/export_excel')
 def export_excel():
     records = db.session.query(DesignRecord, PORecord).join(PORecord).all()
