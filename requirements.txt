@@ -5,3 +5,5 @@ openpyxl==3.1.2  # for Excel export
 pandas
 flask_sqlalchemy
 fpdf
+weasyprint
+reportlab

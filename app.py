@@ -1,14 +1,27 @@
+import json
+import os
 from flask import Flask, render_template, request, redirect, url_for, send_file
 from models import db, PORecord, DesignRecord
 from datetime import datetime
-import sqlite3
-import os
 import pandas as pd
+ 
+
+
+# from reportlab.lib.pagesizes import letter
+# from reportlab.pdfgen import canvas
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///design.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
+
+# Load configuration from settings.json
+def load_settings():
+    with open('settings.json', 'r') as f:
+        return json.load(f)
+
+settings = load_settings()
 
 # Initialize the database and create tables if not exist
 def create_tables():
@@ -72,22 +85,18 @@ def view_all():
     records = db.session.query(DesignRecord, PORecord).join(PORecord).order_by(DesignRecord.id.desc()).all()
     return render_template('view_all.html', records=records)
 
-
-
-
-@app.route('/search')
+@app.route('/search', methods=['GET', 'POST'])
 def search():
-    query = request.args.get('query')
-    records = []
-    if query:
-        records = db.session.query(DesignRecord, PORecord).join(PORecord).filter(
-            (PORecord.po_number.ilike(f'%{query}%')) |
-            (PORecord.project_name.ilike(f'%{query}%')) |
-            (PORecord.client_company_name.ilike(f'%{query}%')) |
-            (DesignRecord.designer_name.ilike(f'%{query}%'))
+    results = []
+    if request.method == 'POST':
+        search_term = request.form['search_term']
+        results = db.session.query(DesignRecord, PORecord).join(PORecord).filter(
+            (PORecord.po_number.like(f'%{search_term}%')) |
+            (PORecord.project_name.like(f'%{search_term}%')) |
+            (PORecord.client_company_name.like(f'%{search_term}%')) |
+            (DesignRecord.designer_name.like(f'%{search_term}%'))
         ).all()
-    return render_template('search.html', records=records, query=query)
-
+    return render_template('search.html', results=results)
 
 @app.route('/export_excel')
 def export_excel():
@@ -108,10 +117,48 @@ def export_excel():
     
     df = pd.DataFrame(data, columns=['Sr.No', 'PO Number', 'PO Date', 'Project Name', 'Customer Name',
                                      'Designer Name', 'Reference Design', 'Design Location', 'Design Release Date'])
-    
-    filepath = 'records_export.xlsx'
+
+    # Use the path from settings.json
+    filepath = settings["excel_save_path"]
+
+    # Ensure the directory exists
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+
     df.to_excel(filepath, index=False)
     return send_file(filepath, as_attachment=True)
+
+
+# @app.route('/download_pdf', methods=['GET'])
+# def download_pdf():
+#     search_term = request.args.get('query')
+#     records = []
+
+#     if search_term:
+#         records = db.session.query(DesignRecord, PORecord).join(PORecord).filter(
+#             (PORecord.po_number.like(f'%{search_term}%')) |
+#             (PORecord.project_name.like(f'%{search_term}%')) |
+#             (PORecord.client_company_name.like(f'%{search_term}%')) |
+#             (DesignRecord.designer_name.like(f'%{search_term}%'))
+#         ).all()
+
+#     # Generate the PDF using ReportLab
+#     pdf_filename = f"search_results_{search_term}.pdf"
+#     pdf_filepath = os.path.join('temp', pdf_filename)
+#     c = canvas.Canvas(pdf_filepath, pagesize=letter)
+#     width, height = letter
+
+#     c.setFont("Helvetica", 12)
+#     c.drawString(100, height - 40, f"Search Term: {search_term}")
+#     c.drawString(100, height - 60, "ID | PO Number | Designer Name | Description | Completion Date")
+
+#     y_position = height - 80
+#     for record, po in records:
+#         c.drawString(100, y_position, f"{record.id} | {po.po_number} | {record.designer_name} | {record.design_description} | {record.completion_date}")
+#         y_position -= 20
+
+#     c.save()
+
+#     return send_file(pdf_filepath, as_attachment=True, download_name=pdf_filename)
 
 if __name__ == '__main__':
     create_tables()  # Ensure tables are created before running the app
