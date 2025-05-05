@@ -15,6 +15,7 @@
                 <thead class="table-dark">
                     <tr>
                         <th scope="col">PO Number</th>
+                        <th scope="col">PO Date</th>
                         <th scope="col">Project Name</th>
                         <th scope="col">Client Name</th>
                         <th scope="col">Designer Name</th>
@@ -27,6 +28,7 @@
                     {% for record, po in records %}
                     <tr>
                         <td>{{ po.po_number }}</td>
+                        <td>{{ po.po_date  }}</td>
                         <td>{{ po.project_name }}</td>
                         <td>{{ po.client_company_name }}</td>
                         <td>{{ record.designer_name }}</td>

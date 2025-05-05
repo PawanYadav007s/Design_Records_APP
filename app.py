@@ -1,3 +1,4 @@
+import sys
 import json
 import os
 from flask import Flask, render_template, request, redirect, url_for, send_file
@@ -16,21 +17,47 @@ from flask import flash  # Add flash for user feedback
 
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///design.db'
+# Determine correct base path
+if getattr(sys, 'frozen', False):
+    # Running as bundled executable
+    base_path = sys._MEIPASS
+else:
+    # Running in normal script
+    base_path = os.path.dirname(os.path.abspath(__file__))
+
+db_path = os.path.join(base_path, 'design.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'Rasco@!@#'
 db.init_app(app)
 
 
-with app.app_context():
-    export_all_data_to_excel()
+# Initialize the database and create tables if not exist
+def create_tables():
+    with app.app_context():
+        db.create_all()
+        export_all_data_to_excel()  # ✅ Only call this after tables exist
+
+create_tables()
 
 
 
 # Load configuration from settings.json
+
+
 def load_settings():
-    with open('settings.json', 'r') as f:
+    if getattr(sys, 'frozen', False):
+        # Running in PyInstaller bundle
+        base_path = sys._MEIPASS
+    else:
+        # Running in normal script
+        base_path = os.path.dirname(os.path.abspath(__file__))
+
+    settings_path = os.path.join(base_path, 'settings.json')
+    with open(settings_path, 'r') as f:
         return json.load(f)
+
 
 settings = load_settings()
 

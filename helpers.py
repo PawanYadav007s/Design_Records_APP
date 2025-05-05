@@ -3,11 +3,28 @@ from models import db, DesignRecord, PORecord
 from flask import current_app
 import json
 import os
+import sys
+
+
+
+
+
+def load_settings():
+    if getattr(sys, 'frozen', False):
+        # Running in PyInstaller bundle
+        base_path = sys._MEIPASS
+    else:
+        # Running in normal script
+        base_path = os.path.dirname(os.path.abspath(__file__))
+
+    settings_path = os.path.join(base_path, 'settings.json')
+    with open(settings_path, 'r') as f:
+        return json.load(f)
+
+settings = load_settings()
+
 
 def export_all_data_to_excel():
-    with open('settings.json') as f:
-        settings = json.load(f)
-
     folder_path = settings['excel_save_path']
     os.makedirs(folder_path, exist_ok=True)
     filepath = os.path.join(folder_path, 'design_records.xlsx')

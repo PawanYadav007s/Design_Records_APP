@@ -7,3 +7,5 @@ flask_sqlalchemy
 fpdf
 weasyprint
 reportlab
+pyinstaller
+pywebview
