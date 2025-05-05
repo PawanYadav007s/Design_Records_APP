@@ -6,7 +6,8 @@ from datetime import datetime
 import pandas as pd
 from helpers import export_all_data_to_excel  # if you’ve modularized it
 
-
+from sqlalchemy.exc import IntegrityError
+from flask import flash  # Add flash for user feedback
 
 
 
@@ -17,6 +18,7 @@ from helpers import export_all_data_to_excel  # if you’ve modularized it
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///design.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.secret_key = 'Rasco@!@#'
 db.init_app(app)
 
 
@@ -54,17 +56,29 @@ def add_po():
         client_company_name = request.form['client_company_name']
         project_name = request.form['project_name']
 
-        new_po = PORecord(po_number=po_number, quotation_number=quotation_number, po_date=po_date,
-                          client_company_name=client_company_name, project_name=project_name)
+        new_po = PORecord(
+            po_number=po_number,
+            quotation_number=quotation_number,
+            po_date=po_date,
+            client_company_name=client_company_name,
+            project_name=project_name
+        )
 
-        db.session.add(new_po)
-        db.session.commit()
-        return redirect(url_for('dashboard'))
+        try:
+            db.session.add(new_po)
+            db.session.commit()
+            flash('PO Record added successfully!', 'success')
+            return redirect(url_for('dashboard'))
+        except IntegrityError:
+            db.session.rollback()
+            flash('PO Number already exists. Please use a unique PO Number.', 'danger')
+            return redirect(url_for('add_po'))
+
     return render_template('add_po.html')
-
 @app.route('/add_form', methods=['GET', 'POST'])
 def add_form():
     if request.method == 'POST':
+        # Collect form data
         po_number = request.form['po_number']
         designer_name = request.form['designer_name']
         reference_design_location = request.form['reference_design_location']
@@ -84,6 +98,10 @@ def add_form():
         db.session.add(new_design)
         po_record.design_status = 'completed'
         db.session.commit()
+
+        # ✅ Export Excel after commit
+        export_all_data_to_excel()
+
         return redirect(url_for('dashboard'))
 
     po_numbers = PORecord.query.filter_by(design_status='pending').all()
@@ -162,37 +180,7 @@ def export_excel():
     return send_file(filepath, as_attachment=True)
 
 
-# @app.route('/download_pdf', methods=['GET'])
-# def download_pdf():
-#     search_term = request.args.get('query')
-#     records = []
 
-#     if search_term:
-#         records = db.session.query(DesignRecord, PORecord).join(PORecord).filter(
-#             (PORecord.po_number.like(f'%{search_term}%')) |
-#             (PORecord.project_name.like(f'%{search_term}%')) |
-#             (PORecord.client_company_name.like(f'%{search_term}%')) |
-#             (DesignRecord.designer_name.like(f'%{search_term}%'))
-#         ).all()
-
-#     # Generate the PDF using ReportLab
-#     pdf_filename = f"search_results_{search_term}.pdf"
-#     pdf_filepath = os.path.join('temp', pdf_filename)
-#     c = canvas.Canvas(pdf_filepath, pagesize=letter)
-#     width, height = letter
-
-#     c.setFont("Helvetica", 12)
-#     c.drawString(100, height - 40, f"Search Term: {search_term}")
-#     c.drawString(100, height - 60, "ID | PO Number | Designer Name | Description | Completion Date")
-
-#     y_position = height - 80
-#     for record, po in records:
-#         c.drawString(100, y_position, f"{record.id} | {po.po_number} | {record.designer_name} | {record.design_description} | {record.completion_date}")
-#         y_position -= 20
-
-#     c.save()
-
-#     return send_file(pdf_filepath, as_attachment=True, download_name=pdf_filename)
 
 if __name__ == '__main__':
     create_tables()  # Ensure tables are created before running the app
