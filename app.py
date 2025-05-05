@@ -85,18 +85,18 @@ def view_all():
     records = db.session.query(DesignRecord, PORecord).join(PORecord).order_by(DesignRecord.id.desc()).all()
     return render_template('view_all.html', records=records)
 
-@app.route('/search', methods=['GET', 'POST'])
+@app.route('/search')
 def search():
-    results = []
-    if request.method == 'POST':
-        search_term = request.form['search_term']
-        results = db.session.query(DesignRecord, PORecord).join(PORecord).filter(
-            (PORecord.po_number.like(f'%{search_term}%')) |
-            (PORecord.project_name.like(f'%{search_term}%')) |
-            (PORecord.client_company_name.like(f'%{search_term}%')) |
-            (DesignRecord.designer_name.like(f'%{search_term}%'))
+    query = request.args.get('query')
+    records = []
+    if query:
+        records = db.session.query(DesignRecord, PORecord).join(PORecord).filter(
+            (PORecord.po_number.ilike(f'%{query}%')) |
+            (PORecord.project_name.ilike(f'%{query}%')) |
+            (PORecord.client_company_name.ilike(f'%{query}%')) |
+            (DesignRecord.designer_name.ilike(f'%{query}%'))
         ).all()
-    return render_template('search.html', results=results)
+    return render_template('search.html', records=records, query=query)
 
 @app.route('/export_excel')
 def export_excel():
