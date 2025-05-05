@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Search Design Records{% endblock %}
+
+{% block content %}
+    <h2 class="text-center mb-4">🔍 Search Design Records</h2>
+
+    <form method="GET" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="query" class="form-control" placeholder="Enter PO number, designer name, or keyword" required>
+            <button type="submit" class="btn btn-info">Search</button>
+        </div>
+    </form>
+
+    {% if records %}
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>PO Number</th>
+                        <th>Project Name</th>
+                        <th>Client Name</th>
+                        <th>Designer Name</th>
+                        <th>Design Location</th>
+                        <th>Design Release Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for design, po in records %}
+                    <tr>
+                        <td>{{ po.po_number }}</td>
+                        <td>{{ po.project_name }}</td>
+                        <td>{{ po.client_company_name }}</td>
+                        <td>{{ design.designer_name }}</td>
+                        <td>
+                            {% if design.design_location %}
+                                <a href="{{ design.design_location }}" target="_blank">{{ design.design_location }}</a>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>{{ design.design_release_date }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% elif query %}
+        <div class="alert alert-warning" role="alert">
+            No results found for "<strong>{{ query }}</strong>".
+        </div>
+    {% endif %}
+
+    <div class="text-center mt-4">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
+    </div>
+{% endblock %}

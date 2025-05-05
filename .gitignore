@@ -1,0 +1,46 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Flask stuff
+instance/
+*.pyc
+
+# SQLite database
+*.db
+*.sqlite3
+
+# Environment variables and settings
+.env
+*.env
+
+# Virtual environment
+venv/
+.venv/
+ENV/
+env/
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# VSCode settings
+.vscode/
+
+# macOS & Linux
+.DS_Store
+*.swp
+
+# Logs and temp files
+*.log
+*.bak
+*.tmp
+
+# Jupyter Notebook checkpoints (if used)
+.ipynb_checkpoints/
+
+# Exported Excel files
+*.xlsx
+
+# PyCharm
+.idea/

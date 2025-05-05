@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View All Records</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container py-5">
+        <h1 class="mb-4 text-center">All Design Records</h1>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col">PO Number</th>
+                        <th scope="col">Project Name</th>
+                        <th scope="col">Client Name</th>
+                        <th scope="col">Designer Name</th>
+                        <th scope="col">Design Location</th>
+                        <th scope="col">Design Release Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record, po in records %}
+                    <tr>
+                        <td>{{ po.po_number }}</td>
+                        <td>{{ po.project_name }}</td>
+                        <td>{{ po.client_company_name }}</td>
+                        <td>{{ record.designer_name }}</td>
+                        <td>
+                            <a href="file://{{ record.design_location }}" target="_blank">
+                                {{ record.design_location }}
+                            </a>
+                        </td>
+                        <td>{{ record.design_release_date.strftime('%Y-%m-%d') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
