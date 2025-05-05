@@ -31,11 +31,22 @@
                         <td>{{ po.client_company_name }}</td>
                         <td>{{ record.designer_name }}</td>
                         <td>
-                            <a href="file:///{{ record.design_location.replace('\\', '/') }}" target="_blank">
-                                {{ record.design_location }}
-                            </a>
-                            
+                            <div class="d-flex align-items-center">
+                                <span class="me-2" style="max-width: 250px; overflow-x: auto; white-space: nowrap;">
+                                    <a href="file:///{{ record.design_location | replace('\\', '/') }}" target="_blank">
+                                        {{ record.design_location }}
+                                    </a>
+                                </span>
+                                <button class="btn btn-sm btn-outline-secondary" 
+                                        onclick="copyToClipboard(`{{ record.design_location | replace('\\', '\\\\') }}`)"
+                                        title="Copy path to clipboard">
+                                    📋
+                                </button>
+                            </div>
                         </td>
+                        
+                        
+                        
                         <td>{{ record.design_release_date.strftime('%Y-%m-%d') }}</td>
                         <td>
                             <a href="{{ url_for('edit_record', record_id=record.id) }}" class="btn btn-sm btn-warning">Edit</a>
@@ -43,6 +54,17 @@
                         </td>
                     </tr>
                     {% endfor %}
+
+                    <script>
+                        function copyToClipboard(text) {
+                            navigator.clipboard.writeText(text)
+                                .then(() => alert('Path copied to clipboard!'))
+                                .catch(err => alert('Failed to copy path: ' + err));
+                        }
+                    </script>
+                    
+                    
+                    
                 </tbody>
             </table>
         </div>
