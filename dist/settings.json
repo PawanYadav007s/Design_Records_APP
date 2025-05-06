@@ -1,3 +1,4 @@
 {
-    "excel_save_path": "Z:\\01_RASCO TEAM DATA\\14_PAWAN\\Design Record Data Excel"
+    "db_path": "D:\\DesignRecord\\dist\\design.db",
+    "excel_save_path": "D:\\DesignRecord\\dist\\ExcelBackup"
 }
