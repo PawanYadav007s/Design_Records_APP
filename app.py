@@ -189,34 +189,45 @@ def delete_record(record_id):
 
 @app.route('/export_excel')
 def export_excel():
-    records = db.session.query(DesignRecord, PORecord).join(PORecord).all()
-    data = []
-    for record, po in records:
-        data.append([
-            len(data) + 1,
-            po.po_number,
-            po.po_date,
-            po.project_name,
-            po.client_company_name,
-            record.designer_name,
-            record.reference_design_location,
-            record.design_location,
-            record.design_release_date
+    try:
+        # Fetch records from the database
+        records = db.session.query(DesignRecord, PORecord).join(PORecord).all()
+        data = []
+        for record, po in records:
+            data.append([
+                len(data) + 1,
+                po.po_number,
+                po.po_date,
+                po.project_name,
+                po.client_company_name,
+                record.designer_name,
+                record.reference_design_location,
+                record.design_location,
+                record.design_release_date
+            ])
+        
+        # Create DataFrame
+        df = pd.DataFrame(data, columns=[
+            'Sr.No', 'PO Number', 'PO Date', 'Project Name', 'Customer Name',
+            'Designer Name', 'Reference Design', 'Design Location', 'Design Release Date'
         ])
-    
-    df = pd.DataFrame(data, columns=[
-        'Sr.No', 'PO Number', 'PO Date', 'Project Name', 'Customer Name',
-        'Designer Name', 'Reference Design', 'Design Location', 'Design Release Date'
-    ])
 
-    # Build full filepath with filename
-    directory = settings["excel_save_path"]
-    os.makedirs(directory, exist_ok=True)
-    filepath = os.path.join(directory, "design_records.xlsx")
+        # Set save path
+        directory = os.path.join(os.path.expanduser("~"), "Downloads")
+        os.makedirs(directory, exist_ok=True)
+        filename = f"design_records_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+        filepath = os.path.join(directory, filename)
 
-    df.to_excel(filepath, index=False)
+        # Save to file
+        df.to_excel(filepath, index=False)
 
-    return send_file(filepath, as_attachment=True)
+        # Try to serve file to browser (works in web browser, may fail in PyWebView)
+        return send_file(filepath, as_attachment=True)
+
+    except Exception as e:
+        # Handle error and show message
+        flash(f"Error exporting Excel file: {str(e)}")
+        return redirect(url_for('dashboard'))
 
 
 
