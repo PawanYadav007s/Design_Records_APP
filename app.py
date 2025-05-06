@@ -25,12 +25,24 @@ else:
     # Running in normal script
     base_path = os.path.dirname(os.path.abspath(__file__))
 
+
+# # --- Use shared folder location ---
+# shared_folder = r"Z:\SharedDataFolder"  # Replace with actual shared path
+# db_path = os.path.join(shared_folder, 'design.db')
 db_path = os.path.join(base_path, 'design.db')
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'Rasco@!@#'
 db.init_app(app)
+
+
+# Enable WAL mode (best for multi-user access)
+with app.app_context():
+    from sqlalchemy import text
+    db.session.execute(text('PRAGMA journal_mode=WAL;'))
+    db.session.commit()
+
 
 
 # Initialize the database and create tables if not exist
@@ -61,10 +73,6 @@ def load_settings():
 
 settings = load_settings()
 
-# Initialize the database and create tables if not exist
-def create_tables():
-    with app.app_context():
-        db.create_all()
 
 # Ensure database creation
 create_tables()
@@ -100,7 +108,8 @@ def add_po():
             db.session.rollback()
             flash('PO Number already exists. Please use a unique PO Number.', 'danger')
             return redirect(url_for('add_po'))
-
+        finally:
+            db.session.close()
     return render_template('add_po.html')
 @app.route('/add_form', methods=['GET', 'POST'])
 def add_form():
