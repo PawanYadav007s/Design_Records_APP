@@ -11,15 +11,29 @@ import sys
 
 def load_settings():
     if getattr(sys, 'frozen', False):
-        # Running in PyInstaller bundle
-        base_path = sys._MEIPASS
+        # Running from .exe, use the directory of the .exe file
+        base_path = os.path.dirname(sys.executable)
     else:
-        # Running in normal script
+        # Running from script
         base_path = os.path.dirname(os.path.abspath(__file__))
 
     settings_path = os.path.join(base_path, 'settings.json')
-    with open(settings_path, 'r') as f:
+
+    # Default settings
+    default_settings = {
+        "excel_save_path": os.path.join(base_path, "ExcelBackup")
+    }
+
+    # Create settings.json if not exist
+    if not os.path.exists(settings_path):
+        os.makedirs(default_settings["excel_save_path"], exist_ok=True)
+        with open(settings_path, "w") as f:
+            json.dump(default_settings, f, indent=4)
+
+    # Load and return
+    with open(settings_path, "r") as f:
         return json.load(f)
+
 
 settings = load_settings()
 
