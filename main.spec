@@ -40,7 +40,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    icon='icon.ico',  
+    icon='file.ico',  
     name='Design_Record',
     debug=False,
     bootloader_ignore_signals=False,
