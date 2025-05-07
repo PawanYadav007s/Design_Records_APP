@@ -70,6 +70,14 @@ def add_po():
 
 
 
+@app.route('/company_names')
+def company_names():
+    names = db.session.query(PORecord.client_company_name).distinct().all()
+    name_list = [name[0] for name in names if name[0]]  # Extract strings
+    return {'companies': name_list}
+
+
+
 @app.route('/edit_po/<int:po_id>', methods=['POST'])
 def edit_po(po_id):
     po = PORecord.query.get_or_404(po_id)

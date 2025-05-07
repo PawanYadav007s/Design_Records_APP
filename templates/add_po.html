@@ -34,8 +34,10 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="client_company_name" class="form-label">Client Company Name</label>
-                                <input type="text" name="client_company_name" class="form-control" required>
+                                <label for="po_date" class="form-label">Company Name</label>
+                                <input type="text" name="client_company_name" id="client_company_name" class="form-control" list="company-suggestions" autocomplete="off" required>
+<datalist id="company-suggestions"></datalist>
+
                             </div>
 
                             <div class="mb-3">
@@ -58,6 +60,23 @@
 
     <!-- Bootstrap JS (optional) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        fetch("/company_names")
+            .then(response => response.json())
+            .then(data => {
+                const datalist = document.getElementById("company-suggestions");
+                data.companies.forEach(company => {
+                    const option = document.createElement("option");
+                    option.value = company;
+                    datalist.appendChild(option);
+                });
+            })
+            .catch(error => console.error("Error loading company names:", error));
+    });
+</script>
+
 </body>
 
 {% with messages = get_flashed_messages(with_categories=true) %}
