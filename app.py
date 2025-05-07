@@ -1,6 +1,6 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, send_file, flash
-from models import db, PORecord, DesignRecord
+from models import db, PORecord, DesignRecord,Designer
 from datetime import datetime
 from sqlalchemy.exc import IntegrityError
 from helpers import export_all_data_to_excel, load_settings, get_base_path
@@ -70,7 +70,7 @@ def add_po():
 
 @app.route('/add_form', methods=['GET', 'POST'])
 def add_form():
-    """Route for designers to fill form based on available POs."""
+    """Route for designers to fill form based on available POs and select designer from dropdown."""
     if request.method == 'POST':
         try:
             po_number = request.form['po_number']
@@ -93,7 +93,45 @@ def add_form():
         return redirect(url_for('dashboard'))
 
     po_numbers = PORecord.query.filter_by(design_status='pending').all()
-    return render_template('add_form.html', po_numbers=po_numbers)
+    designers = Designer.query.order_by(Designer.name).all()
+    return render_template('add_form.html', po_numbers=po_numbers, designers=designers)
+
+
+
+@app.route('/designers', methods=['GET', 'POST'])
+def manage_designers():
+    if request.method == 'POST':
+        name = request.form['designer_name'].strip()
+        if name:
+            existing = Designer.query.filter_by(name=name).first()
+            if not existing:
+                db.session.add(Designer(name=name))
+                db.session.commit()
+            else:
+                flash("Designer already exists.", "warning")
+        return redirect(url_for('manage_designers'))
+
+    designers = Designer.query.order_by(Designer.name).all()
+    return render_template('manage_designers.html', designers=designers)
+
+@app.route('/delete_designer/<int:designer_id>', methods=['POST'])
+def delete_designer(designer_id):
+    designer = Designer.query.get_or_404(designer_id)
+    db.session.delete(designer)
+    db.session.commit()
+    return redirect(url_for('manage_designers'))
+
+@app.route('/edit_designer/<int:designer_id>', methods=['POST'])
+def edit_designer(designer_id):
+    designer = Designer.query.get_or_404(designer_id)
+    new_name = request.form['new_name'].strip()
+    if new_name:
+        designer.name = new_name
+        db.session.commit()
+    return redirect(url_for('manage_designers'))
+
+
+
 
 @app.route('/view_all')
 def view_all():

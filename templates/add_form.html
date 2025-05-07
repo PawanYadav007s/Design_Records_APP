@@ -30,7 +30,12 @@
 
                             <div class="mb-3">
                                 <label for="designer_name" class="form-label">Designer Name</label>
-                                <input type="text" name="designer_name" class="form-control" required>
+                                <select name="designer_name" class="form-select" required>
+                                    <option value="" disabled selected>Select Designer</option>
+                                    {% for designer in designers %}
+                                        <option value="{{ designer.name }}">{{ designer.name }}</option>
+                                    {% endfor %}
+                                </select>
                             </div>
 
                             <div class="mb-3">
