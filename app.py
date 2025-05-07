@@ -68,6 +68,27 @@ def add_po():
         return redirect(url_for('dashboard'))
     return render_template('add_po.html')
 
+
+
+@app.route('/edit_po/<int:po_id>', methods=['POST'])
+def edit_po(po_id):
+    po = PORecord.query.get_or_404(po_id)
+    po.po_number = request.form['po_number']
+    po.quotation_number = request.form['quotation_number']
+
+    # ✅ Convert string to Python date object
+    po.po_date = datetime.strptime(request.form['po_date'], '%Y-%m-%d').date()
+
+    po.client_company_name = request.form['client_company_name']
+    po.project_name = request.form['project_name']
+    
+    db.session.commit()
+    export_all_data_to_excel()
+    flash('Purchase Order updated successfully!', 'success')
+    return redirect(url_for('view_all'))
+
+
+
 @app.route('/add_form', methods=['GET', 'POST'])
 def add_form():
     """Route for designers to fill form based on available POs and select designer from dropdown."""
