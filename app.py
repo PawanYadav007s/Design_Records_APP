@@ -176,6 +176,8 @@ def search():
         (PORecord.po_number.ilike(f'%{query}%')) |
         (PORecord.project_name.ilike(f'%{query}%')) |
         (PORecord.client_company_name.ilike(f'%{query}%')) |
+        (PORecord.po_date.ilike(f'%{query}%')) |
+       (DesignRecord.design_release_date.ilike(f'%{query}%')) |
         (DesignRecord.designer_name.ilike(f'%{query}%'))
     ).all() if query else []
     return render_template('search.html', records=records, query=query)
