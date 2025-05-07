@@ -15,7 +15,6 @@ a = Analysis(
     ('settings.json', '.'),
     ('templates', 'templates'),
     ('static', 'static'),
-    ('design.db', '.')  # ← Include the SQLite DB
 ],
      hiddenimports=[
         'jinja2.ext',

@@ -6,23 +6,15 @@ from sqlalchemy.exc import IntegrityError
 from helpers import export_all_data_to_excel, load_settings, get_base_path
 import pandas as pd
 
-# ... (all your imports)
-
 # Initialize Flask app
 app = Flask(__name__)
 app.secret_key = 'Pawanyadav211191@!@#'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Load configuration and set database path
-settings = load_settings()
-try:
-    db_path = settings.get("db_path")
-    if not os.path.exists(os.path.dirname(db_path)):
-        raise FileNotFoundError("DB directory does not exist")
-except Exception as e:
-    print(f"[WARNING] Falling back to default DB path: {e}")
-    db_path = os.path.join(get_base_path(), "design.db")
+# Set database path directly from base path
+from helpers import get_base_path
 
+db_path = os.path.join(get_base_path(), "design.db")
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_path}"
 db.init_app(app)
 
@@ -43,8 +35,6 @@ create_tables()
 
 # Routes follow
 
-
-# Routes
 
 @app.route('/')
 def dashboard():

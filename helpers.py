@@ -5,15 +5,14 @@ import os
 import sys
 
 def get_base_path():
-    """Returns the base path depending on if app is frozen (compiled) or not."""
+    """Returns the base path depending on whether app is frozen (compiled) or not."""
     return os.path.dirname(sys.executable if getattr(sys, 'frozen', False) else os.path.abspath(__file__))
 
 def load_settings():
-    """Loads or creates default settings.json file for paths used in app."""
+    """Loads or creates default settings.json for Excel export path."""
     base_path = get_base_path()
     settings_path = os.path.join(base_path, 'settings.json')
     default_settings = {
-        "db_path": os.path.join(base_path, "design.db"),
         "excel_save_path": os.path.join(base_path, "ExcelBackup")
     }
 
@@ -29,6 +28,7 @@ def load_settings():
     # Ensure Excel path exists
     os.makedirs(settings["excel_save_path"], exist_ok=True)
     return settings
+
 
 def export_all_data_to_excel():
     """Exports all design records to an Excel file for backup."""
