@@ -11,6 +11,12 @@
     <div class="container py-5">
         <h1 class="mb-4 text-center">All Design Records</h1>
 
+        <form method="GET" class="mb-3 d-flex" action="{{ url_for('view_all') }}">
+          <input type="text" name="query" class="form-control me-2" placeholder="Search PO, Project, Client, or Designer" value="{{ query }}">
+          <button type="submit" class="btn btn-primary">Search</button>
+      </form>
+      
+
         <div class="table-responsive">
             <table class="table table-bordered table-striped align-middle">
                 <thead class="table-dark">

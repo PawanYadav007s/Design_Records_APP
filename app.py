@@ -164,9 +164,20 @@ def edit_designer(designer_id):
 
 @app.route('/view_all')
 def view_all():
-    """Displays all design records."""
-    records = db.session.query(DesignRecord, PORecord).join(PORecord).order_by(DesignRecord.id.desc()).all()
-    return render_template('view_all.html', records=records)
+    query = request.args.get('query', '').strip()
+    if query:
+        records = db.session.query(DesignRecord, PORecord).join(PORecord).filter(
+             (PORecord.po_number.ilike(f'%{query}%')) |
+        (PORecord.project_name.ilike(f'%{query}%')) |
+        (PORecord.client_company_name.ilike(f'%{query}%')) |
+        (PORecord.po_date.ilike(f'%{query}%')) |
+       (DesignRecord.design_release_date.ilike(f'%{query}%')) |
+        (DesignRecord.designer_name.ilike(f'%{query}%'))
+    ).order_by(DesignRecord.design_release_date.desc()).all()
+    else:
+        records = db.session.query(DesignRecord, PORecord).join(PORecord).order_by(DesignRecord.id.desc()).all()
+    return render_template('view_all.html', records=records, query=query)
+
 
 @app.route('/search')
 def search():
@@ -179,7 +190,7 @@ def search():
         (PORecord.po_date.ilike(f'%{query}%')) |
        (DesignRecord.design_release_date.ilike(f'%{query}%')) |
         (DesignRecord.designer_name.ilike(f'%{query}%'))
-    ).all() if query else []
+    ).order_by(DesignRecord.design_release_date.desc()).all() if query else []
     return render_template('search.html', records=records, query=query)
 
 @app.route('/edit/<int:record_id>', methods=['GET', 'POST'])
