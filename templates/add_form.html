@@ -18,15 +18,28 @@
                     </div>
                     <div class="card-body">
                         <form method="POST">
-                            <div class="mb-3">
-                                <label for="po_number" class="form-label">PO Number</label>
-                                <select name="po_number" class="form-select" required>
-                                    <option value="" disabled selected>Select PO Number</option>
-                                    {% for po in po_numbers %}
-                                        <option value="{{ po.po_number }}">{{ po.po_number }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
+                           <!-- PO Number Dropdown -->
+<div class="mb-3">
+    <label for="po_number" class="form-label">Select PO Number</label>
+    <select name="po_number" id="po_number" class="form-select" required onchange="updateProjectName()">
+        <option value="">-- Select PO Number --</option>
+        {% for po in po_numbers %}
+            <option value="{{ po.po_number }}" data-project="{{ po.project_name }}">
+                {{ po.po_number }}
+            </option>
+        {% endfor %}
+    </select>
+</div>
+
+<!-- Auto-filled Project Name -->
+<div class="mb-3">
+    <label for="project_name" class="form-label">Project Name</label>
+    <input type="text" id="project_name" class="form-control" name="project_name" readonly required>
+</div>
+
+
+
+
 
                             <div class="mb-3">
                                 <label for="designer_name" class="form-label">Designer Name</label>
@@ -68,5 +81,15 @@
 
     <!-- Bootstrap JS (optional) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function updateProjectName() {
+            const poDropdown = document.getElementById("po_number");
+            const selectedOption = poDropdown.options[poDropdown.selectedIndex];
+            const projectName = selectedOption.getAttribute("data-project") || "";
+            document.getElementById("project_name").value = projectName;
+        }
+        </script>
+        
 </body>
 </html>
